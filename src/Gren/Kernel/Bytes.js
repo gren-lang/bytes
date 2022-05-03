@@ -1,8 +1,8 @@
 /*
 
 import Bytes.Encode as Encode exposing (getWidth, write)
-import Elm.Kernel.Scheduler exposing (binding, succeed)
-import Elm.Kernel.Utils exposing (Tuple2, chr)
+import Gren.Kernel.Scheduler exposing (binding, succeed)
+import Gren.Kernel.Utils exposing (Tuple2, chr)
 import Maybe exposing (Just, Nothing)
 
 */

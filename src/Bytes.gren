@@ -17,7 +17,7 @@ module Bytes exposing
 -}
 
 
-import Elm.Kernel.Bytes
+import Gren.Kernel.Bytes
 import Task exposing (Task)
 
 
@@ -76,7 +76,7 @@ how many bytes there are!
 -}
 width : Bytes -> Int
 width =
-  Elm.Kernel.Bytes.width
+  Gren.Kernel.Bytes.width
 
 
 
@@ -135,4 +135,4 @@ type Endianness = LE | BE
 -}
 getHostEndianness : Task x Endianness
 getHostEndianness =
-  Elm.Kernel.Bytes.getHostEndianness LE BE
+  Gren.Kernel.Bytes.getHostEndianness LE BE

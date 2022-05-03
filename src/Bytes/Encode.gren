@@ -52,7 +52,7 @@ type Encoder
   | U32 Endianness Int
   | F32 Endianness Float
   | F64 Endianness Float
-  | Seq Int (List Encoder)
+  | Seq Int (Array Encoder)
   | Utf8 Int String
   | Bytes Bytes
 
@@ -95,7 +95,7 @@ this intermediate `Encoder` can help reduce allocation quite a lot!
 -}
 encode : Encoder -> Bytes
 encode =
-  Elm.Kernel.Bytes.encode
+  Gren.Kernel.Bytes.encode
 
 
 
@@ -231,7 +231,7 @@ to make negative numbers small.
 -}
 string : String -> Encoder
 string str =
-  Utf8 (Elm.Kernel.Bytes.getStringWidth str) str
+  Utf8 (Gren.Kernel.Bytes.getStringWidth str) str
 
 
 {-| Get the width of a `String` in UTF-8 bytes.
@@ -249,7 +249,7 @@ Read more about how UTF-8 works [here](https://en.wikipedia.org/wiki/UTF-8).
 -}
 getStringWidth : String -> Int
 getStringWidth =
-  Elm.Kernel.Bytes.getStringWidth
+  Gren.Kernel.Bytes.getStringWidth
 
 
 
@@ -273,7 +273,7 @@ values for the position of a ball in 3D space, you could say:
         ]
 
 -}
-sequence : List Encoder -> Encoder
+sequence : Array Encoder -> Encoder
 sequence builders =
   Seq (getWidths 0 builders) builders
 
@@ -285,27 +285,27 @@ sequence builders =
 write : Encoder -> Bytes -> Int -> Int
 write builder mb offset =
   case builder of
-    I8    n -> Elm.Kernel.Bytes.write_i8  mb offset n
-    I16 e n -> Elm.Kernel.Bytes.write_i16 mb offset n (e == LE)
-    I32 e n -> Elm.Kernel.Bytes.write_i32 mb offset n (e == LE)
-    U8    n -> Elm.Kernel.Bytes.write_u8  mb offset n
-    U16 e n -> Elm.Kernel.Bytes.write_u16 mb offset n (e == LE)
-    U32 e n -> Elm.Kernel.Bytes.write_u32 mb offset n (e == LE)
-    F32 e n -> Elm.Kernel.Bytes.write_f32 mb offset n (e == LE)
-    F64 e n -> Elm.Kernel.Bytes.write_f64 mb offset n (e == LE)
+    I8    n -> Gren.Kernel.Bytes.write_i8  mb offset n
+    I16 e n -> Gren.Kernel.Bytes.write_i16 mb offset n (e == LE)
+    I32 e n -> Gren.Kernel.Bytes.write_i32 mb offset n (e == LE)
+    U8    n -> Gren.Kernel.Bytes.write_u8  mb offset n
+    U16 e n -> Gren.Kernel.Bytes.write_u16 mb offset n (e == LE)
+    U32 e n -> Gren.Kernel.Bytes.write_u32 mb offset n (e == LE)
+    F32 e n -> Gren.Kernel.Bytes.write_f32 mb offset n (e == LE)
+    F64 e n -> Gren.Kernel.Bytes.write_f64 mb offset n (e == LE)
     Seq _ bs -> writeSequence bs mb offset
-    Utf8 _ s -> Elm.Kernel.Bytes.write_string mb offset s
-    Bytes bs -> Elm.Kernel.Bytes.write_bytes mb offset bs
+    Utf8 _ s -> Gren.Kernel.Bytes.write_string mb offset s
+    Bytes bs -> Gren.Kernel.Bytes.write_bytes mb offset bs
 
 
-writeSequence : List Encoder -> Bytes -> Int -> Int
+writeSequence : Array Encoder -> Bytes -> Int -> Int
 writeSequence builders mb offset =
-  case builders of
-    [] ->
+  case Array.first builders of
+    Nothing ->
       offset
 
-    b :: bs ->
-      writeSequence bs mb (write b mb offset)
+    Just b ->
+      writeSequence (Array.dropFirst 1 builders) mb (write b mb offset)
 
 
 
@@ -325,14 +325,14 @@ getWidth builder =
     F64 _ _ -> 8
     Seq w _ -> w
     Utf8 w _ -> w
-    Bytes bs -> Elm.Kernel.Bytes.width bs
+    Bytes bs -> Gren.Kernel.Bytes.width bs
 
 
-getWidths : Int -> List Encoder -> Int
+getWidths : Int -> Array Encoder -> Int
 getWidths width builders =
-  case builders of
-    [] ->
+  case Array.first builders of
+    Nothing ->
       width
 
-    b :: bs ->
-      getWidths (width + getWidth b) bs
+    Just b ->
+      getWidths (width + getWidth b) (Array.dropFirst 1 builders)

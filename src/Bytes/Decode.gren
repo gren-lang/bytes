@@ -47,13 +47,13 @@ import Bytes exposing (Bytes, Endianness(..))
 -- PARSER
 
 
-{-| Describes how to turn a sequence of bytes into a nice Elm value.
+{-| Describes how to turn a sequence of bytes into a nice Gren value.
 -}
 type Decoder a =
-  Decoder (Bytes -> Int -> (Int, a))
+  Decoder (Bytes -> Int -> {offset : Int, value : a})
 
 
-{-| Turn a sequence of bytes into a nice Elm value.
+{-| Turn a sequence of bytes into a nice Gren value.
 
     -- decode (unsignedInt16 BE) <0007> == Just 7
     -- decode (unsignedInt16 LE) <0700> == Just 7
@@ -66,7 +66,7 @@ show a case where there are not enough bytes.
 -}
 decode : Decoder a -> Bytes -> Maybe a
 decode (Decoder decoder) bs =
-  Elm.Kernel.Bytes.decode decoder bs
+  Gren.Kernel.Bytes.decode decoder bs
 
 
 
@@ -77,21 +77,21 @@ decode (Decoder decoder) bs =
 -}
 signedInt8 : Decoder Int
 signedInt8 =
-  Decoder Elm.Kernel.Bytes.read_i8
+  Decoder Gren.Kernel.Bytes.read_i8
 
 
 {-| Decode two bytes into an integer from `-32768` to `32767`.
 -}
 signedInt16 : Endianness -> Decoder Int
 signedInt16 endianness =
-  Decoder (Elm.Kernel.Bytes.read_i16 (endianness == LE))
+  Decoder (Gren.Kernel.Bytes.read_i16 (endianness == LE))
 
 
 {-| Decode four bytes into an integer from `-2147483648` to `2147483647`.
 -}
 signedInt32 : Endianness -> Decoder Int
 signedInt32 endianness =
-  Decoder (Elm.Kernel.Bytes.read_i32 (endianness == LE))
+  Decoder (Gren.Kernel.Bytes.read_i32 (endianness == LE))
 
 
 
@@ -102,21 +102,21 @@ signedInt32 endianness =
 -}
 unsignedInt8 : Decoder Int
 unsignedInt8 =
-  Decoder Elm.Kernel.Bytes.read_u8
+  Decoder Gren.Kernel.Bytes.read_u8
 
 
 {-| Decode two bytes into an integer from `0` to `65535`.
 -}
 unsignedInt16 : Endianness -> Decoder Int
 unsignedInt16 endianness =
-  Decoder (Elm.Kernel.Bytes.read_u16 (endianness == LE))
+  Decoder (Gren.Kernel.Bytes.read_u16 (endianness == LE))
 
 
 {-| Decode four bytes into an integer from `0` to `4294967295`.
 -}
 unsignedInt32 : Endianness -> Decoder Int
 unsignedInt32 endianness =
-  Decoder (Elm.Kernel.Bytes.read_u32 (endianness == LE))
+  Decoder (Gren.Kernel.Bytes.read_u32 (endianness == LE))
 
 
 
@@ -127,14 +127,14 @@ unsignedInt32 endianness =
 -}
 float32 : Endianness -> Decoder Float
 float32 endianness =
-  Decoder (Elm.Kernel.Bytes.read_f32 (endianness == LE))
+  Decoder (Gren.Kernel.Bytes.read_f32 (endianness == LE))
 
 
 {-| Decode eight bytes into a floating point number.
 -}
 float64 : Endianness -> Decoder Float
 float64 endianness =
-  Decoder (Elm.Kernel.Bytes.read_f64 (endianness == LE))
+  Decoder (Gren.Kernel.Bytes.read_f64 (endianness == LE))
 
 
 
@@ -145,7 +145,7 @@ float64 endianness =
 -}
 bytes : Int -> Decoder Bytes
 bytes n =
-  Decoder (Elm.Kernel.Bytes.read_bytes n)
+  Decoder (Gren.Kernel.Bytes.read_bytes n)
 
 
 
@@ -174,7 +174,7 @@ leeway to read the width as a [Base 128 Varint][pb] for ProtoBuf, a
 -}
 string : Int -> Decoder String
 string n =
-  Decoder (Elm.Kernel.Bytes.read_string n)
+  Decoder (Gren.Kernel.Bytes.read_string n)
 
 
 
@@ -198,9 +198,9 @@ map func (Decoder decodeA) =
   Decoder <|
     \bites offset ->
       let
-        (aOffset, a) = decodeA bites offset
+        a = decodeA bites offset
       in
-      (aOffset, func a)
+      { offset = a.offset, value = func a.value }
 
 
 {-| Combine two decoders.
@@ -221,10 +221,10 @@ map2 func (Decoder decodeA) (Decoder decodeB) =
   Decoder <|
     \bites offset ->
       let
-        (aOffset, a) = decodeA bites offset
-        (bOffset, b) = decodeB bites aOffset
+        a = decodeA bites offset
+        b = decodeB bites a.offset
       in
-      (bOffset, func a b)
+      { offset = b.offset, value = func a.value b.value }
 
 
 {-| Combine three decoders.
@@ -234,11 +234,11 @@ map3 func (Decoder decodeA) (Decoder decodeB) (Decoder decodeC) =
   Decoder <|
     \bites offset ->
       let
-        (aOffset, a) = decodeA bites offset
-        (bOffset, b) = decodeB bites aOffset
-        (cOffset, c) = decodeC bites bOffset
+        a = decodeA bites offset
+        b = decodeB bites a.offset
+        c = decodeC bites b.offset
       in
-      (cOffset, func a b c)
+      { offset = c.offset, value = func a.value b.value c.value }
 
 
 {-| Combine four decoders.
@@ -248,12 +248,12 @@ map4 func (Decoder decodeA) (Decoder decodeB) (Decoder decodeC) (Decoder decodeD
   Decoder <|
     \bites offset ->
       let
-        (aOffset, a) = decodeA bites offset
-        (bOffset, b) = decodeB bites aOffset
-        (cOffset, c) = decodeC bites bOffset
-        (dOffset, d) = decodeD bites cOffset
+        a = decodeA bites offset
+        b = decodeB bites a.offset
+        c = decodeC bites b.offset
+        d = decodeD bites c.offset
       in
-      (dOffset, func a b c d)
+      { offset = d.offset, value = func a.value b.value c.value d.value }
 
 
 {-| Combine five decoders. If you need to combine more things, it is possible
@@ -264,13 +264,13 @@ map5 func (Decoder decodeA) (Decoder decodeB) (Decoder decodeC) (Decoder decodeD
   Decoder <|
     \bites offset ->
       let
-        (aOffset, a) = decodeA bites offset
-        (bOffset, b) = decodeB bites aOffset
-        (cOffset, c) = decodeC bites bOffset
-        (dOffset, d) = decodeD bites cOffset
-        (eOffset, e) = decodeE bites dOffset
+        a = decodeA bites offset
+        b = decodeB bites a.offset
+        c = decodeC bites b.offset
+        d = decodeD bites c.offset
+        e = decodeE bites d.offset
       in
-      (eOffset, func a b c d e)
+      { offset = e.offset, value = func a.value b.value c.value d.value e.value }
 
 
 
@@ -297,10 +297,10 @@ andThen callback (Decoder decodeA) =
   Decoder <|
     \bites offset ->
       let
-        (newOffset, a) = decodeA bites offset
-        (Decoder decodeB) = callback a
+        new = decodeA bites offset
+        (Decoder decodeB) = callback new.value
       in
-      decodeB bites newOffset
+      decodeB bites new.offset
 
 
 {-| A decoder that always succeeds with a certain value. Maybe we are making
@@ -325,7 +325,7 @@ decoding the value and put it in a `Just`.
 -}
 succeed : a -> Decoder a
 succeed a =
-  Decoder (\_ offset -> (offset,a))
+  Decoder (\_ offset -> { offset = offset, value = a })
 
 
 {-| A decoder that always fails. This can be useful when using `andThen` to
@@ -361,7 +361,7 @@ working with meters do that, and otherwise something went wrong!
 -}
 fail : Decoder a
 fail =
-  Decoder Elm.Kernel.Bytes.decodeFailure
+  Decoder Gren.Kernel.Bytes.decodeFailure
 
 
 
@@ -393,12 +393,12 @@ repeated structures, like a list:
     import Bytes exposing (Endianness(..))
     import Bytes.Decode as Decode exposing (..)
 
-    list : Decoder a -> Decoder (List a)
+    list : Decoder a -> Decoder (Array a)
     list decoder =
       unsignedInt32 BE
         |> andThen (\len -> loop (len, []) (listStep decoder))
 
-    listStep : Decoder a -> (Int, List a) -> Decoder (Step (Int, List a) (List a))
+    listStep : Decoder a -> { fst : Int, snd : Array a } -> Decoder (Step { fst Int, snd : Array a } (Array a))
     listStep decoder (n, xs) =
       if n <= 0 then
         succeed (Done xs)
@@ -414,15 +414,15 @@ loop state callback =
   Decoder (loopHelp state callback)
 
 
-loopHelp : state -> (state -> Decoder (Step state a)) -> Bytes -> Int -> (Int, a)
+loopHelp : state -> (state -> Decoder (Step state a)) -> Bytes -> Int -> { offset : Int, value : a }
 loopHelp state callback bites offset =
   let
     (Decoder decoder) = callback state
-    (newOffset, step) = decoder bites offset
+    new = decoder bites offset
   in
-  case step of
+  case new.value of
     Loop newState ->
-      loopHelp newState callback bites newOffset
+      loopHelp newState callback bites new.offset
 
     Done result ->
-      ( newOffset, result )
+      { offset = new.offset, value = result }
