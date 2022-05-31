@@ -33,7 +33,7 @@ toPointEncoder point =
 
 pointDecoder : Decoder Point
 pointDecoder =
-  Decode.map3 Point
+  Decode.map3 (\x y z -> { x = x, y = y, z = z } )
     (Decode.float32 BE)
     (Decode.float32 BE)
     (Decode.float32 BE)
