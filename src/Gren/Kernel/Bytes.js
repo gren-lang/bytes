@@ -135,18 +135,18 @@ var _Bytes_decode = F2(function(decoder, bytes)
 	}
 });
 
-var _Bytes_read_i8  = F2(function(      bytes, offset) { return {offset: offset + 1, value: bytes.getInt8(offset)}; });
-var _Bytes_read_i16 = F3(function(isLE, bytes, offset) { return {offset: offset + 2, value: bytes.getInt16(offset, isLE)}; });
-var _Bytes_read_i32 = F3(function(isLE, bytes, offset) { return {offset: offset + 4, value: bytes.getInt32(offset, isLE)}; });
-var _Bytes_read_u8  = F2(function(      bytes, offset) { return {offset: offset + 1, value: bytes.getUint8(offset)}; });
-var _Bytes_read_u16 = F3(function(isLE, bytes, offset) { return {offset: offset + 2, value: bytes.getUint16(offset, isLE)}; });
-var _Bytes_read_u32 = F3(function(isLE, bytes, offset) { return {offset: offset + 4, value: bytes.getUint32(offset, isLE)}; });
-var _Bytes_read_f32 = F3(function(isLE, bytes, offset) { return {offset: offset + 4, value: bytes.getFloat32(offset, isLE)}; });
-var _Bytes_read_f64 = F3(function(isLE, bytes, offset) { return {offset: offset + 8, value: bytes.getFloat64(offset, isLE)}; });
+var _Bytes_read_i8  = F2(function(      bytes, offset) { return {__$offset: offset + 1, __$value: bytes.getInt8(offset)}; });
+var _Bytes_read_i16 = F3(function(isLE, bytes, offset) { return {__$offset: offset + 2, __$value: bytes.getInt16(offset, isLE)}; });
+var _Bytes_read_i32 = F3(function(isLE, bytes, offset) { return {__$offset: offset + 4, __$value: bytes.getInt32(offset, isLE)}; });
+var _Bytes_read_u8  = F2(function(      bytes, offset) { return {__$offset: offset + 1, __$value: bytes.getUint8(offset)}; });
+var _Bytes_read_u16 = F3(function(isLE, bytes, offset) { return {__$offset: offset + 2, __$value: bytes.getUint16(offset, isLE)}; });
+var _Bytes_read_u32 = F3(function(isLE, bytes, offset) { return {__$offset: offset + 4, __$value: bytes.getUint32(offset, isLE)}; });
+var _Bytes_read_f32 = F3(function(isLE, bytes, offset) { return {__$offset: offset + 4, __$value: bytes.getFloat32(offset, isLE)}; });
+var _Bytes_read_f64 = F3(function(isLE, bytes, offset) { return {__$offset: offset + 8, __$value: bytes.getFloat64(offset, isLE)}; });
 
 var _Bytes_read_bytes = F3(function(len, bytes, offset)
 {
-	return {offset: offset + len, value: new DataView(bytes.buffer, bytes.byteOffset + offset, len)};
+	return {__$offset: offset + len, __$value: new DataView(bytes.buffer, bytes.byteOffset + offset, len)};
 });
 
 var _Bytes_read_string = F3(function(len, bytes, offset)
@@ -179,7 +179,7 @@ var _Bytes_read_string = F3(function(len, bytes, offset)
 				, String.fromCharCode(Math.floor(byte / 0x400) + 0xD800, byte % 0x400 + 0xDC00)
 				);
 	}
-	return {offset: offset, value: string};
+	return {__$offset: offset, __$value: string};
 });
 
 var _Bytes_decodeFailure = F2(function() { throw 0; });
