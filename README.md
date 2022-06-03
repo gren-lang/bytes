@@ -9,7 +9,7 @@ The goal of this package is to support **network protocols** such as ProtoBuf. O
 
 This package lets you create encoders and decoders for working with sequences of bytes. Here is an example for converting between `Point` and `Bytes` values:
 
-```elm
+```gren
 import Bytes exposing (Endianness(..))
 import Bytes.Encode as Encode exposing (Encoder)
 import Bytes.Decode as Decode exposing (Decoder)
