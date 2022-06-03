@@ -129,7 +129,7 @@ var _Bytes_write_string = F3(function(mb, offset, string)
 var _Bytes_decode = F2(function(decoder, bytes)
 {
 	try {
-		return __Maybe_Just(A2(decoder, bytes, 0).value);
+		return __Maybe_Just(A2(decoder, bytes, 0).__$value);
 	} catch(e) {
 		return __Maybe_Nothing;
 	}
