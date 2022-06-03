@@ -2,7 +2,7 @@
 
 import Bytes.Encode as Encode exposing (getWidth, write)
 import Gren.Kernel.Scheduler exposing (binding, succeed)
-import Gren.Kernel.Utils exposing (Tuple2, chr)
+import Gren.Kernel.Utils exposing (chr)
 import Maybe exposing (Just, Nothing)
 
 */
@@ -129,24 +129,24 @@ var _Bytes_write_string = F3(function(mb, offset, string)
 var _Bytes_decode = F2(function(decoder, bytes)
 {
 	try {
-		return __Maybe_Just(A2(decoder, bytes, 0).b);
+		return __Maybe_Just(A2(decoder, bytes, 0).value);
 	} catch(e) {
 		return __Maybe_Nothing;
 	}
 });
 
-var _Bytes_read_i8  = F2(function(      bytes, offset) { return __Utils_Tuple2(offset + 1, bytes.getInt8(offset)); });
-var _Bytes_read_i16 = F3(function(isLE, bytes, offset) { return __Utils_Tuple2(offset + 2, bytes.getInt16(offset, isLE)); });
-var _Bytes_read_i32 = F3(function(isLE, bytes, offset) { return __Utils_Tuple2(offset + 4, bytes.getInt32(offset, isLE)); });
-var _Bytes_read_u8  = F2(function(      bytes, offset) { return __Utils_Tuple2(offset + 1, bytes.getUint8(offset)); });
-var _Bytes_read_u16 = F3(function(isLE, bytes, offset) { return __Utils_Tuple2(offset + 2, bytes.getUint16(offset, isLE)); });
-var _Bytes_read_u32 = F3(function(isLE, bytes, offset) { return __Utils_Tuple2(offset + 4, bytes.getUint32(offset, isLE)); });
-var _Bytes_read_f32 = F3(function(isLE, bytes, offset) { return __Utils_Tuple2(offset + 4, bytes.getFloat32(offset, isLE)); });
-var _Bytes_read_f64 = F3(function(isLE, bytes, offset) { return __Utils_Tuple2(offset + 8, bytes.getFloat64(offset, isLE)); });
+var _Bytes_read_i8  = F2(function(      bytes, offset) { return {offset: offset + 1, value: bytes.getInt8(offset)}; });
+var _Bytes_read_i16 = F3(function(isLE, bytes, offset) { return {offset: offset + 2, value: bytes.getInt16(offset, isLE)}; });
+var _Bytes_read_i32 = F3(function(isLE, bytes, offset) { return {offset: offset + 4, value: bytes.getInt32(offset, isLE)}; });
+var _Bytes_read_u8  = F2(function(      bytes, offset) { return {offset: offset + 1, value: bytes.getUint8(offset)}; });
+var _Bytes_read_u16 = F3(function(isLE, bytes, offset) { return {offset: offset + 2, value: bytes.getUint16(offset, isLE)}; });
+var _Bytes_read_u32 = F3(function(isLE, bytes, offset) { return {offset: offset + 4, value: bytes.getUint32(offset, isLE)}; });
+var _Bytes_read_f32 = F3(function(isLE, bytes, offset) { return {offset: offset + 4, value: bytes.getFloat32(offset, isLE)}; });
+var _Bytes_read_f64 = F3(function(isLE, bytes, offset) { return {offset: offset + 8, value: bytes.getFloat64(offset, isLE)}; });
 
 var _Bytes_read_bytes = F3(function(len, bytes, offset)
 {
-	return __Utils_Tuple2(offset + len, new DataView(bytes.buffer, bytes.byteOffset + offset, len));
+	return {offset: offset + len, value: new DataView(bytes.buffer, bytes.byteOffset + offset, len)};
 });
 
 var _Bytes_read_string = F3(function(len, bytes, offset)
@@ -179,7 +179,7 @@ var _Bytes_read_string = F3(function(len, bytes, offset)
 				, String.fromCharCode(Math.floor(byte / 0x400) + 0xD800, byte % 0x400 + 0xDC00)
 				);
 	}
-	return __Utils_Tuple2(offset, string);
+	return {offset: offset, value: string};
 });
 
 var _Bytes_decodeFailure = F2(function() { throw 0; });
