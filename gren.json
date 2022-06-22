@@ -3,7 +3,7 @@
     "name": "gren-lang/bytes",
     "summary": "Work with sequences of bytes (a.k.a. ArrayBuffer, typed arrays, DataView)",
     "license": "BSD-3-Clause",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "exposed-modules": [
         "Bytes",
         "Bytes.Encode",
@@ -11,7 +11,7 @@
     ],
     "gren-version": "0.1.0 <= v < 0.2.0",
     "dependencies": {
-        "gren-lang/core": "1.0.0 <= v < 2.0.0"
+        "gren-lang/core": "2.0.1 <= v < 3.0.0"
     },
     "test-dependencies": {}
 }
